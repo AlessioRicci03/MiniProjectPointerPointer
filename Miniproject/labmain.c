@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// hello world
+
 extern void print(const char*);
 extern void print_dec(unsigned int);
 extern void display_string(char*);
