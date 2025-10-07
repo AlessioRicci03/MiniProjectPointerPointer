@@ -4,7 +4,7 @@ welcome_msg: .asciz "================================================\n===== RIS
 	
 .section .text
 .align 2
-.globl _start, enable_interrupt, handle_interrupt
+.globl _start, enable_interrupt, handle_interrupt, delay
 	
 _isr_handler:
 	j _isr_routine	   /* ISR service routine here */
@@ -142,3 +142,29 @@ enable_interrupt:
 	csrsi mie, 17
 	
 	ret
+
+delay:
+    addi sp, sp, -8
+    sw   ra, 4(sp)
+    sw   s0, 0(sp)
+
+    mv   s0, a0          # ms counter
+
+while_loop:
+    blez s0, done_delay  # while(ms > 0)
+
+    addi s0, s0, -1      # ms
+
+    li   t0, 0           # i = 0
+    li   t1, 5700000        # to be altered
+
+for_loop:
+    bge  t0, t1, while_loop
+    addi t0, t0, 1
+    j    for_loop
+
+done_delay:
+    lw   s0, 0(sp)
+    lw   ra, 4(sp)
+    addi sp, sp, 8
+    jr   ra
