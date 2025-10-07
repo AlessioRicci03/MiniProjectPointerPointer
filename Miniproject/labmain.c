@@ -133,9 +133,7 @@ int main(){
 }
 
 void toptobottom(){
-
-    
-
+   
     for (int i = 0; i < 320*480; i++)
         VGA[i] = i / 320;
     
@@ -145,7 +143,7 @@ void toptobottom(){
         
         *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
         *(VGA_CTRL+0) = 0;
-        y_ofs= (y_ofs+ 1) % 240;
+        y_ofs= (y_ofs + 1) % 240;
         
         for (int i = 0; i < 1000000; i++)
             asm volatile ("nop");
@@ -153,15 +151,54 @@ void toptobottom(){
 }
 
 void bottomtotop(){
-
+   for (int i = 0; i < 320*480; i++)
+        VGA[i] = i / 320;
+    
+    unsigned int y_ofs= 240;
+    
+    while (1){
+        
+        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
+        *(VGA_CTRL+0) = 0;
+        y_ofs= (y_ofs - 1) % 240;
+        
+        for (int i = 0; i < 1000000; i++)
+            asm volatile ("nop");
+    }
 }
 
 void lefttoright(){
-
+   for (int i = 0; i < 320*480; i++)
+        VGA[i] = i / 320;
+    
+    unsigned int x_ofs= 320;
+    
+    while (1){
+        
+        *(VGA_CTRL+1) = (unsigned int) (VGA+x_ofs);
+        *(VGA_CTRL+0) = 0;
+        x_ofs= (x_ofs - 1) % 320;
+        
+        for (int i = 0; i < 1000000; i++)
+            asm volatile ("nop");
+    }
 }
 
 void righttoleft(){
-
+   for (int i = 0; i < 320*480; i++)
+        VGA[i] = i / 320;
+    
+    unsigned int x_ofs= 0;
+    
+    while (1){
+        
+        *(VGA_CTRL+1) = (unsigned int) (VGA+x_ofs);
+        *(VGA_CTRL+0) = 0;
+        x_ofs= (x_ofs+ 1) % 320;
+        
+        for (int i = 0; i < 1000000; i++)
+            asm volatile ("nop");
+    }
 }
 
 /* Your code goes into main as well as any needed functions. */
