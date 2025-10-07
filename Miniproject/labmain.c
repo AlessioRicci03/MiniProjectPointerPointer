@@ -22,12 +22,6 @@ extern int nextprime( int );
 extern void enable_interrupt(void);
 extern void handle_interrupt(unsigned cause);
 
-int prime = 1234567;
-
-int mytime = 0x5957;
-char textstring[] = "text, more text, and even more text!";
-volatile int * leds = (volatile int*)0x4000000;
-volatile int * sgmnt = (volatile int*)0x4000050;
 volatile int * toggles = (volatile int*)0x4000010;
 volatile int * spbtn = (volatile int*)0x040000d0;
 
@@ -38,39 +32,12 @@ volatile unsigned int * t_periodh = (volatile unsigned int*)0x0400002c;
 volatile unsigned int * t_snapl = (volatile unsigned int*)0x04000030;
 volatile unsigned int * t_snaph = (volatile unsigned int*)0x04000034;
 
+volatile char *VGA = (volatile char*) 0x08000000;
+volatile int *VGA_CTRL = (volatile int*) 0x04000100;
+
 int timecounter = 0;
 
-//volatile unsigned int * mstatus = (volatile unsigned int*)0x300;
-//volatile unsigned int * mie = (volatile unsigned int*)0x304;
-
-
-static const int which_digit[10]={
-  0xC0, // 0
-  0xf9, // 1
-  0xa4, // 2
-  0xb0, // 3
-  0x99, // 4
-  0x92, // 5
-  0x82, // 6
-  0xf8, // 7
-  0x80, // 8
-  0x90  // 9
-};
 /* Below is the function that will be called when an interrupt is triggered. */
-void set_leds(int led_mask){ // led_mask between 0-1023
-  *leds = led_mask & 0x3ff;
-}
-
-void set_display(int display_number, int value){
-    int tdigit = (value / 10) % 10;
-    int sdigit = value % 10;
-
-    volatile int *trgt1 = (volatile int *)((int)sgmnt + (display_number * 0x10));
-    volatile int *trgt2 = (volatile int *)((int)sgmnt + ((display_number+1) * 0x10));
-
-    *trgt1 = which_digit[sdigit];
-    *trgt2 = which_digit[tdigit];
-}
 
 int get_sw(){
   int tem = *toggles;
@@ -83,47 +50,6 @@ int get_btn(){
 }
 
 void handle_interrupt(unsigned cause) {
-  static int secs = 0;
-  static int mins = 0;
-  static int hrs = 0;
-  static int lb = 0;
-
-  if(get_btn() & 0x1){
-    //reset
-  }
-
-  switch(get_sw()){
-    case 0b1:
-      //go right
-    case 0b10:
-      //go down
-    case 0b100:
-      //go left
-    case 0b1000:
-      //go up5
-  }
-
-  if(get_sw() & 0x2){
-    secs++;
-    if(secs >= 60){
-      secs = secs % 60;
-      mins++;
-    }
-    if (mins >= 60){
-      mins = mins % 60;
-      hrs++;
-    }
-    if(hrs >= 100){
-      hrs = 0;
-    }
-
-    set_display(0, secs);
-    set_display(2, mins);
-    set_display(4, hrs);
-
-    
-    delay(1);
-  }
 
   if(((*t_status) & 1) == 1){
     (*t_status) = 0;
@@ -132,31 +58,25 @@ void handle_interrupt(unsigned cause) {
     if(timecounter >= 10){
       timecounter = 0;
 
-      set_display(0, secs);
-      set_display(2, mins);
-      set_display(4, hrs);
+       if(get_btn() & 0x1){
+          //reset
+        }
 
-      secs++;
-      if(secs >= 60){
-        secs = secs % 60;
-        mins++;
+     switch(get_sw()){
+       case 0b1:
+         //go right
+       case 0b10:
+         //go down
+       case 0b100:
+         //go left
+       case 0b1000:
+         //go up5
+        }
+    
+       delay(1);
       }
-      if (mins >= 60){
-        mins = mins % 60;
-        hrs++;
-      }
-      if(hrs >= 100){
-        hrs = 0;
-      }
-
-      time2string( textstring, mytime ); // Converts mytime to string
-      tick( &mytime );     // Ticks the clock once
-
-      set_leds(lb);
-      lb++;
-      lb = lb % 0x400;
     }
-  }
+}
 
   if(get_btn() == 1){
     int sw = get_sw();
@@ -195,16 +115,60 @@ void labinit(void){
   
 }
 
+int main(){
+    for (int i = 0; i < 320*480; i++)
+        VGA[i] = i / 320;
+    
+    unsigned int y_ofs= 0;
+    
+    while (1){
+        
+        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
+        *(VGA_CTRL+0) = 0;
+        y_ofs= (y_ofs+ 1) % 240;
+        
+        for (int i = 0; i < 1000000; i++)
+            asm volatile ("nop");
+    }
+}
+
+void toptobottom(){
+
+    
+
+    for (int i = 0; i < 320*480; i++)
+        VGA[i] = i / 320;
+    
+    unsigned int y_ofs= 0;
+    
+    while (1){
+        
+        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
+        *(VGA_CTRL+0) = 0;
+        y_ofs= (y_ofs+ 1) % 240;
+        
+        for (int i = 0; i < 1000000; i++)
+            asm volatile ("nop");
+    }
+}
+
+void bottomtotop(){
+
+}
+
+void lefttoright(){
+
+}
+
+void righttoleft(){
+
+}
+
 /* Your code goes into main as well as any needed functions. */
 int main() {
   // Call labinit()
   labinit();
 
-  while (1) {
-    print("Prime: ");
-    prime = nextprime(prime);
-    print_dec(prime);
-    print("\n");
-  }
+  printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
 }
 
