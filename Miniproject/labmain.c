@@ -201,11 +201,48 @@ void righttoleft(){
     }
 }
 
-/* Your code goes into main as well as any needed functions. */
-int main() {
-  // Call labinit()
-  labinit();
+void corner(int x, int y){
+int lowx = 0;
+int highx = sizeof(xcoord)/sizeof(xcoord[0]);
+int lowy = 0;
+int highy = sizeof(ycoord)/sizeof(ycoord[0]);
 
-  printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
+while (lowx <= highx) {
+        int mid = lowx + (highx - lowx) / 2;
+        
+        if (xcoord[mid] <= x && xcoord[mid+1] > x){
+            *xy = xcoord[mid];
+            xy++;
+        }
+
+        if (xcoord[mid] < x)
+            lowx = mid + 1;
+
+        else
+            highx = mid - 1;
+    }
+
+while (lowy <= highy) {
+        int mid = lowy + (highy - lowy) / 2;
+        
+        if (ycoord[mid] <= y && ycoord[mid+1] > y){
+            *xy = ycoord[mid];
+        }
+
+        if (ycoord[mid] < y)
+            lowy = mid + 1;
+
+        else
+            highy = mid - 1;
+    }
+
+}
+
+int main() {
+   // Call labinit()
+   labinit();
+   volatile int *xy = (int*)malloc(2 * sizeof(int));
+
+   printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
 }
 
