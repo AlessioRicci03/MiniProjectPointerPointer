@@ -4,10 +4,25 @@
 struct xy{
   int x;
   int y;
-}
+};
+
+struct pics{
+  int x;
+  int y;
+  //picture
+};
 
 struct xy cursor;
 struct xy pic;
+
+struct pics Matrix[6][6]={
+  {{0, 0,},{0, 54,},{0, 107,},{0, 160,},{0, 213,},{0, 266,}}
+  {{40, 0,},{40, 54,},{40, 107,},{40, 160,},{40, 213,},{40, 266,}}
+  {{80, 0,},{80, 54,},{80, 107,},{80, 160,},{80, 213,},{80, 266,}}
+  {{120, 0,},{120, 54,},{120, 107,},{120, 160,},{120, 213,},{120, 266,}}
+  {{160, 0,},{160, 54,},{160, 107,},{160, 160,},{160, 213,},{160, 266,}}
+  {{200, 0,},{200, 54,},{200, 107,},{200, 160,},{200, 213,},{200, 266,}}
+};
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -34,6 +49,7 @@ volatile char *VGA = (volatile char*) 0x08000000;
 volatile int *VGA_CTRL = (volatile int*) 0x04000100;
 
 int timecounter = 0;
+char countdown[] = "3";
 
 volatile unsigned int width = 320;
 volatile unsigned int length = 240;
@@ -188,31 +204,40 @@ void corner(){
 
 }
 
+void vga_print(char *str, int x, int y, int color){
+}
+
 void handle_interrupt(unsigned cause) {
    if(((*t_status) & 1) == 1){
       (*t_status) = 0;
       timecounter++;
       if(timecounter >= 100){
          timecounter = 0;
-         //advance the countdown
-         //show picture if countdown is done
+         vga_print("Cursor located. Pointing...", 0, 0, 0x0F);
+         if(countdown[0] != "0"){
+           vga_print(countdown, 0, 10, 0x0F);
+           countdown[0]--;
+         } else{
+           //show picture
          }
       }
-   }  
-}
+  }
+}  
 
 int main() {
    labinit();
-   printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
 
    while(1){
     if(((*t_status) & 1) == 1){
+       vga_print("Finding cursor... Please, hold still", 0, 0, 0x0F);
        (*t_status) = 0;
-       if(get_sw == 0b1 ||  get_sw == 0b10 ||  get_sw == 0b100 ||  get_sw == 0b1000){
+       int b = getsw();
+       if(b == 0b1 XOR b == 0b10 XOR b == 0b100 XOR b == 0b1000){
          timecounter = 0;
+         countdown = 3;
          //set the display black and write something to invite the user to stop the cursor from moving
        
-         switch(get_sw()){
+         switch(b){
               case 0b1:
                  cursor.x++;
               case 0b10:
