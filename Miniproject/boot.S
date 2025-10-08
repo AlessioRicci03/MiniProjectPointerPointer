@@ -139,7 +139,6 @@ enable_interrupt:
 	
 	csrsi mstatus, 3
 	csrsi mie, 16
-	csrsi mie, 17
 	
 	ret
 
