@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+struct xy{
+  int x;
+  int y;
+}
+
+struct xy cursor;
+struct xy pic;
+
 extern void print(const char*);
 extern void print_dec(unsigned int);
 extern void display_string(char*);
@@ -27,13 +35,16 @@ volatile int *VGA_CTRL = (volatile int*) 0x04000100;
 
 int timecounter = 0;
 
+volatile unsigned int width = 320;
+volatile unsigned int length = 240;
+
 static const int xcoord[6]={
   0,
+  40,
   80,
+  120,
   160,
-  240,
-  320,
-  400
+  200
 };
 
 static const int ycoord[6]={
@@ -64,6 +75,11 @@ void labinit(void){
   *t_ctrl = 0b0111;
 
   enable_interrupt();
+
+  //create a space
+  
+  cursor.x = 120;
+  cursor.y = 160;
   
 }
 
@@ -136,7 +152,7 @@ void righttoleft(){
     }
 }
 
-void corner(int x, int y){
+void corner(){
    int lowx = 0;
    int highx = sizeof(xcoord)/sizeof(xcoord[0]);
    int lowy = 0;
@@ -145,12 +161,11 @@ void corner(int x, int y){
    while (lowx <= highx) {
         int mid = lowx + (highx - lowx) / 2;
         
-        if (xcoord[mid] <= x && xcoord[mid+1] > x){
-            *xy = xcoord[mid];
-            xy++;
+        if (xcoord[mid] <= cursor.x && xcoord[mid+1] > cursor.x){
+            pic.x = xcoord[mid];
         }
 
-        if (xcoord[mid] < x)
+        if (xcoord[mid] < cursor.x)
             lowx = mid + 1;
 
         else
@@ -160,12 +175,11 @@ void corner(int x, int y){
    while (lowy <= highy) {
         int mid = lowy + (highy - lowy) / 2;
         
-        if (ycoord[mid] <= y && ycoord[mid+1] > y){
-            *xy = ycoord[mid];
-            xy--;
+        if (ycoord[mid] <= cursor.y && ycoord[mid+1] > cursor.y){
+            pic.y = ycoord[mid];
         }
 
-        if (ycoord[mid] < y)
+        if (ycoord[mid] < cursor.y)
             lowy = mid + 1;
 
         else
@@ -185,32 +199,45 @@ void handle_interrupt(unsigned cause) {
          }
       }
    }  
-  if(get_btn() == 1){
-     //reset
-  }
 }
 
 int main() {
-   // Call labinit()
    labinit();
-   volatile int *xy = (int*)malloc(2 * sizeof(int));
    printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
 
    while(1){
-      switch(get_sw()){
-            case 0b1:
-               timecounter = 0;
-               //go right
-            case 0b10:
-               timecounter = 0;
-               //go down
-            case 0b100:
-               timecounter = 0;
-               //go left
-            case 0b1000:
-               timecounter = 0;
-               //go up
-      delay(1)
-   }   
-}
+    if(((*t_status) & 1) == 1){
+       (*t_status) = 0;
+       if(get_sw == 0b1 ||  get_sw == 0b10 ||  get_sw == 0b100 ||  get_sw == 0b1000){
+         timecounter = 0;
+         //set the display black and write something to invite the user to stop the cursor from moving
+       
+         switch(get_sw()){
+              case 0b1:
+                 cursor.x++;
+              case 0b10:
+                 cursor.y++;
+              case 0b100:
+                 cursor.x--;
+              case 0b1000:
+                 cursor.y--;
+         }
+       
+         if(cursor.x > 318)
+              cursor.x = 318;
+         else if(cursor.x < 2)
+              cursor.x = 2;
 
+         if(cursor.y > 238)
+              cursor.y = 238;
+         else if(cursor.y < 2)
+              cursor.y = 2;
+       }
+     
+      if(get_btn() == 1){
+        labinit(); //reset
+    }
+      delay(1)
+    }
+  }
+}
