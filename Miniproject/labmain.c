@@ -1,15 +1,5 @@
-/* main.c
-
-   This file written 2024 by Artur Podobas and Pedro Antunes
-
-   For copyright and licensing, see file COPYING */
-
-
-/* Below functions are external and found in other files. */
 #include <stdio.h>
 #include <stdbool.h>
-
-// hello world
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -37,7 +27,23 @@ volatile int *VGA_CTRL = (volatile int*) 0x04000100;
 
 int timecounter = 0;
 
-/* Below is the function that will be called when an interrupt is triggered. */
+static const int xcoord[6]={
+  0,
+  80,
+  160,
+  240,
+  320,
+  400
+};
+
+static const int ycoord[6]={
+  0,
+  54,
+  107,
+  160,
+  213,
+  266
+};
 
 int get_sw(){
   int tem = *toggles;
@@ -49,87 +55,16 @@ int get_btn(){
   return temp & 0x1;
 }
 
-void handle_interrupt(unsigned cause) {
-
-  if(((*t_status) & 1) == 1){
-    (*t_status) = 0;
-
-    timecounter++;
-    if(timecounter >= 10){
-      timecounter = 0;
-
-       if(get_btn() & 0x1){
-          //reset
-        }
-
-     switch(get_sw()){
-       case 0b1:
-         //go right
-       case 0b10:
-         //go down
-       case 0b100:
-         //go left
-       case 0b1000:
-         //go up5
-        }
-    
-       delay(1);
-      }
-    }
-}
-
-  if(get_btn() == 1){
-    int sw = get_sw();
-    int select = (sw >> 8) & 0x3;
-    int value = sw & 0x3f;
-
-    if(select == 0b01){
-      secs = value % 60;
-    } else if(select == 0b10){
-      mins = value % 60;
-    } else if(select == 0b11){
-      hrs = value % 100;
-    }
-  }
-}
-
-/* Add your code here for initializing interrupts. */
 void labinit(void){
   *t_status = 0;
 
-  *t_periodl = 0xc6bf;
-  *t_periodh = 0x002d;   // 100ms
+  *t_periodl = 0x93DF;
+  *t_periodh = 0x0004;   // 10ms
   
   *t_ctrl = 0b0111;
 
-  set_display(0, 0); // using a for-loop only gives alternating 0's
-  set_display(1, 0);
-  set_display(2, 0);
-  set_display(3, 0);
-  set_display(4, 0);
-  set_display(5, 0);
-
-  set_leds(0);
-
   enable_interrupt();
   
-}
-
-int main(){
-    for (int i = 0; i < 320*480; i++)
-        VGA[i] = i / 320;
-    
-    unsigned int y_ofs= 0;
-    
-    while (1){
-        
-        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
-        *(VGA_CTRL+0) = 0;
-        y_ofs= (y_ofs+ 1) % 240;
-        
-        for (int i = 0; i < 1000000; i++)
-            asm volatile ("nop");
-    }
 }
 
 void toptobottom(){
@@ -202,12 +137,12 @@ void righttoleft(){
 }
 
 void corner(int x, int y){
-int lowx = 0;
-int highx = sizeof(xcoord)/sizeof(xcoord[0]);
-int lowy = 0;
-int highy = sizeof(ycoord)/sizeof(ycoord[0]);
+   int lowx = 0;
+   int highx = sizeof(xcoord)/sizeof(xcoord[0]);
+   int lowy = 0;
+   int highy = sizeof(ycoord)/sizeof(ycoord[0]);
 
-while (lowx <= highx) {
+   while (lowx <= highx) {
         int mid = lowx + (highx - lowx) / 2;
         
         if (xcoord[mid] <= x && xcoord[mid+1] > x){
@@ -222,11 +157,12 @@ while (lowx <= highx) {
             highx = mid - 1;
     }
 
-while (lowy <= highy) {
+   while (lowy <= highy) {
         int mid = lowy + (highy - lowy) / 2;
         
         if (ycoord[mid] <= y && ycoord[mid+1] > y){
             *xy = ycoord[mid];
+            xy--;
         }
 
         if (ycoord[mid] < y)
@@ -238,11 +174,43 @@ while (lowy <= highy) {
 
 }
 
+void handle_interrupt(unsigned cause) {
+   if(((*t_status) & 1) == 1){
+      (*t_status) = 0;
+      timecounter++;
+      if(timecounter >= 100){
+         timecounter = 0;
+         //advance the countdown
+         //show picture if countdown is done
+         }
+      }
+   }  
+  if(get_btn() == 1){
+     //reset
+  }
+}
+
 int main() {
    // Call labinit()
    labinit();
    volatile int *xy = (int*)malloc(2 * sizeof(int));
-
    printf("Starting from right to left, toggle the following swithches to move the cursor.\n 1: go right\n 2: go down\n 3: go left\n 4: go up\n"); 
+
+   while(1){
+      switch(get_sw()){
+            case 0b1:
+               timecounter = 0;
+               //go right
+            case 0b10:
+               timecounter = 0;
+               //go down
+            case 0b100:
+               timecounter = 0;
+               //go left
+            case 0b1000:
+               timecounter = 0;
+               //go up
+      delay(1)
+   }   
 }
 
