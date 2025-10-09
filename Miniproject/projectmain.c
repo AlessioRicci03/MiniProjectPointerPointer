@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <inttypes.h>
-#include "images.h" \\must keep
+#include "images.h"
 
 struct xy{
   int x;
@@ -26,38 +26,38 @@ struct xy newcoords;
 struct xy pic;
 
 struct pics Matrix[6][6]={
-  {{0, 0, img0},{0, 54, img1_5_7},{0, 107, img2_3},{0, 160, img2_3},{0, 213, img4_34},{0, 266, img1_5_7}},
-  {{40, 0, img6_8_9_11},{40, 54, img1_5_7},{40, 107, img6_8_9_11},{40, 160, img6_8_9_11},{40, 213, img10},{40, 266, img6_8_9_11}},
-  {{80, 0, img12},{80, 54, img13_14_15_26_28_30_32_33_35},{80, 107, img13_14_15_26_28_30_32_33_35},{80, 160, img13_14_15_26_28_30_32_33_35},{80, 213, img16},{80, 266, img17}},
-  {{120, 0, img18},{120, 54, img19},{120, 107, img20},{120, 160, img21},{120, 213, img22},{120, 266, img23}},
-  {{160, 0, img24},{160, 54, img25},{160, 107, img13_14_15_26_28_30_32_33_35},{160, 160, img27},{160, 213, img13_14_15_26_28_30_32_33_35},{160, 266, img29}},
-  {{200, 0, img13_14_15_26_28_30_32_33_35},{200, 54, img31},{200, 107, img13_14_15_26_28_30_32_33_35},{200, 160, img13_14_15_26_28_30_32_33_35},{200, 213, img4_34},{200, 266, img13_14_15_26_28_30_32_33_35}}
+  {{0, 0,},{0, 54,},{0, 107,},{0, 160,},{0, 213,},{0, 266,}},
+  {{40, 0,},{40, 54,},{40, 107,},{40, 160,},{40, 213,},{40, 266,}},
+  {{80, 0,},{80, 54,},{80, 107,},{80, 160,},{80, 213,},{80, 266,}},
+  {{120, 0,},{120, 54,},{120, 107,},{120, 160,},{120, 213,},{120, 266,}},
+  {{160, 0,},{160, 54,},{160, 107,},{160, 160,},{160, 213,},{160, 266,}},
+  {{200, 0,},{200, 54,},{200, 107,},{200, 160,},{200, 213,},{200, 266,}}
 };
 
-struct font font8x8[21]{
-  const unsigned char font8x8[21] = {
-    {'A',{0b00011000,0b00111100,0b01100110,0b01111110,0b01100110,0b01100110,0b01100110,0b00000000}},
-    {'C',{0b00111100,0b11000011,0b11000000,0b11000000,0b11000000,0b11000011,0b00111100,0b00000000}},
-    {'D',{0b11111100,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b11111100,0b00000000}},
-    {'E',{0b11111111,0b11000000,0b11000000,0b11111111,0b11000000,0b11000000,0b11111111,0b00000000}},
-    {'F',{0b11111111,0b11111111,0b11000000,0b11111100,0b11000000,0b11000000,0b11000000,0b00000000}},
-    {'G',{0b00111100,0b11000011,0b11000000,0b11000000,0b11001111,0b11000011,0b00111100,0b00000000}},
-    {'H',{0b11000011,0b11000011,0b11000011,0b11111111,0b11000011,0b11000011,0b11000011,0b00000000}},
-    {'I',{0b00111100,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00111100,0b00000000}},
-    {'L',{0b11000000,0b11000000,0b11000000,0b11000000,0b11000000,0b11000000,0b11111111,0b00000000}},
-    {'N',{0b11000011,0b11110011,0b11011011,0b11011011,0b11011011,0b11001111,0b11000011,0b00000000}},
-    {'O',{0b00111100,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b00111100,0b00000000}},
-    {'P',{0b11111100,0b11000011,0b11000011,0b11111100,0b11000000,0b11000000,0b11000000,0b00000000}},
-    {'R',{0b11111100,0b11000011,0b11000011,0b11111100,0b11110000,0b11001100,0b11000011,0b00000000}},
-    {'S',{0b00111100,0b11000011,0b01100000,0b00011000,0b00000110,0b11000011,0b00111100,0b00000000}},
-    {'T',{0b11111111,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00000000}},
-    {'U',{0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b00111100,0b00000000}},
-    {'3',{0b00111100,0b11000011,0b00000011,0b00111100,0b00000011,0b11000011,0b00111100,0b00000000}}, 
-    {'2',{0b00111100,0b11000011,0b00000011,0b00001100,0b00110000,0b11000000,0b11111111,0b00000000}}, 
-    {'1',{0b00011000,0b01111000,0b00011000,0b00011000,0b00011000,0b00011000,0b00111100,0b00000000}},  
-    {'.',{0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b11000000,0b11000000,0b00000000}}, 
-    {',',{0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b11000000,0b11000000,0b11000000}}
-}
+struct font font8x8[22] = {
+  {' ', {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}},
+  {'A',{0b00011000,0b00111100,0b01100110,0b01111110,0b01100110,0b01100110,0b01100110,0b00000000}},
+  {'C',{0b00111100,0b11000011,0b11000000,0b11000000,0b11000000,0b11000011,0b00111100,0b00000000}},
+  {'D',{0b11111100,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b11111100,0b00000000}},
+  {'E',{0b11111111,0b11000000,0b11000000,0b11111111,0b11000000,0b11000000,0b11111111,0b00000000}},
+  {'F',{0b11111111,0b11111111,0b11000000,0b11111100,0b11000000,0b11000000,0b11000000,0b00000000}},
+  {'G',{0b00111100,0b11000011,0b11000000,0b11000000,0b11001111,0b11000011,0b00111100,0b00000000}},
+  {'H',{0b11000011,0b11000011,0b11000011,0b11111111,0b11000011,0b11000011,0b11000011,0b00000000}},
+  {'I',{0b00111100,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00111100,0b00000000}},
+  {'L',{0b11000000,0b11000000,0b11000000,0b11000000,0b11000000,0b11000000,0b11111111,0b00000000}},
+  {'N',{0b11000011,0b11110011,0b11011011,0b11011011,0b11011011,0b11001111,0b11000011,0b00000000}},
+  {'O',{0b00111100,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b00111100,0b00000000}},
+  {'P',{0b11111100,0b11000011,0b11000011,0b11111100,0b11000000,0b11000000,0b11000000,0b00000000}},
+  {'R',{0b11111100,0b11000011,0b11000011,0b11111100,0b11110000,0b11001100,0b11000011,0b00000000}},
+  {'S',{0b00111100,0b11000011,0b01100000,0b00011000,0b00000110,0b11000011,0b00111100,0b00000000}},
+  {'T',{0b11111111,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00011000,0b00000000}},
+  {'U',{0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b00111100,0b00000000}},
+  {'3',{0b00111100,0b11000011,0b00000011,0b00111100,0b00000011,0b11000011,0b00111100,0b00000000}}, 
+  {'2',{0b00111100,0b11000011,0b00000011,0b00001100,0b00110000,0b11000000,0b11111111,0b00000000}}, 
+  {'1',{0b00011000,0b01111000,0b00011000,0b00011000,0b00011000,0b00011000,0b00111100,0b00000000}},  
+  {'.',{0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b11000000,0b11000000,0b00000000}}, 
+  {',',{0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b11000000,0b11000000,0b11000000}}
+};
 
 extern void print(const char*);
 extern void print_dec(unsigned int);
@@ -90,8 +90,8 @@ volatile uint16_t  *screen_buf = (volatile uint16_t *)0x08000000;
 #define SCREEN_H 240
 #define CRSR_SIZE 5
 
-int activity_counter = 0;
-int inactivity_counter = 0;
+volatile int activity_counter = 0;
+volatile int inactivity_counter = 0;
 char countdown[] = "3";
 
 static const int xcoord[6]={
@@ -171,55 +171,57 @@ void labinit(void){
   
   *t_ctrl = 0b0111;
 
+
   clear_screen();
   refresh_vga();
 
   cursorcoords.x = SCREEN_W/2;
-  cursorcoords.y = SCREEN_H/2
+  cursorcoords.y = SCREEN_H/2;
 
   draw_cursor_xy(cursorcoords.x, cursorcoords.y);
   refresh_vga();
-  
+
+
   enable_interrupt();
 }
 
 void printpicturepixel(int *array){
-   for (int i = 0; i < 320; i++)
-     for (int j = 0; j < 320*480; j+= 320)
-        VGA[i+j] = (char) array[i+j];
+  for (int i = 0; i < 320; i++)
+    for (int j = 0; j < 320*480; j+= 320)
+      screen_buf[i+j] = (char) array[i+j];
 }
 
 void printpicture(){
   int lowx = 0;
-   int highx = sizeof(xcoord)/sizeof(xcoord[0]);
-   int lowy = 0;
-   int highy = sizeof(ycoord)/sizeof(ycoord[0]);
+  int highx = sizeof(xcoord)/sizeof(xcoord[0]);
+  int lowy = 0;
+  int highy = sizeof(ycoord)/sizeof(ycoord[0]);
 
-    while (lowx <= highx) {
-        int midx = lowx + (highx - lowx) / 2;
+  while (lowx <= highx) {
+    int midx = lowx + (highx - lowx) / 2;
         
-        if (pic.x == Matrix[midx][0].x){
-            while (lowy <= highy) {
-              int midy = lowy + (highy - lowy) / 2;
+    if (pic.x == Matrix[midx][0].x){
+      while (lowy <= highy) {
+        int midy = lowy + (highy - lowy) / 2;
         
-              if (pic.y == Matrix[midx][midy].y){
-                printpicturepixel(Matrix[midx][midy].arr);
-              }
-
-              else if (pic.y < Matrix[midx][midy].y)
-                lowy = midy + 1;
-
-              else
-                highy = midy - 1;
-            }
+        if (pic.y == Matrix[midx][midy].y){
+          printpicturepixel(Matrix[midx][midy].arr);
         }
 
-        else if (pic.x < Matrix[midx][0].x)
-            lowx = midx + 1;
+        else if (pic.y < Matrix[midx][midy].y)
+          lowy = midy + 1;
 
         else
-            highx = midx - 1;
+          highy = midy - 1;
+      }
     }
+
+    else if (pic.x < Matrix[midx][0].x)
+      lowx = midx + 1;
+
+    else
+      highx = midx - 1;
+  }
 }
 
 void corner(){
@@ -231,11 +233,11 @@ void corner(){
    while (lowx <= highx) {
         int mid = lowx + (highx - lowx) / 2;
         
-        if (xcoord[mid] <= cursor.x && xcoord[mid+1] > cursor.x){
+        if (xcoord[mid] <= cursorcoords.x && xcoord[mid+1] > cursorcoords.x){
             pic.x = xcoord[mid];
         }
 
-        else if (xcoord[mid] < cursor.x)
+        if (xcoord[mid] < cursorcoords.x)
             lowx = mid + 1;
 
         else
@@ -245,11 +247,11 @@ void corner(){
    while (lowy <= highy) {
         int mid = lowy + (highy - lowy) / 2;
         
-        if (ycoord[mid] <= cursor.y && ycoord[mid+1] > cursor.y){
+        if (ycoord[mid] <= cursorcoords.y && ycoord[mid+1] > cursorcoords.y){
             pic.y = ycoord[mid];
         }
 
-        else if (ycoord[mid] < cursor.y)
+        if (ycoord[mid] < cursorcoords.y)
             lowy = mid + 1;
 
         else
@@ -259,51 +261,58 @@ void corner(){
 }
 
 void draw_pixel(int x, int y, unsigned short color) {
-    if (x < 0 || x >= width || y < 0 || y >= length) 
+    if (x < 0 || x >= SCREEN_W || y < 0 || y >= SCREEN_H) 
       return;
-    VGA[y * width + x] = color;
+    screen_buf[y * SCREEN_W + x] = color;
 }
 
 void draw_char(int *ch, int x, int y, unsigned int color) {
-    for (int row = 0; row < 8; row++) {
-        int bits = ch[row];
-        for (int col = 7; col < 0; col--) {
-            if (bits & (1 << col)) {
-                VGA_draw_pixel(x + col, y + row, color);
-            }
-        }
+  for (int row = 0; row < 8; row++) {
+    int bits = ch[row];
+    for (int col = 0; col < 8; col++) {
+      if (bits & (1 << (7 - col))) {
+        draw_pixel(x + col, y + row, color);
+      }
     }
+  }
 }
 
 void vga_print(char *str, int x, int y, unsigned int color){
   int k = 0;
   while(str[k] != '\0'){
-    for(int i = 0, i < 21, i++){
-      if(str[k] = font8x8[i].c){
-        draw_char(font8x8[i].bin, x, y, color);
+    for(int i = 0; i < 21; i++){
+      if(str[k] == font8x8[i].c){
+        draw_char(font8x8[i].binary, x, y, color);
+        x += 8;
+        break;
       }
     }
     k++;
   }
+  refresh_vga();
 }
 
 void handle_interrupt(unsigned cause) {
   if((*t_status & 1) == 1) {
-    *t_status = 0;
+    *t_status = 0; // clear timer flag
 
     if(!activity_counter) {
       inactivity_counter++;
       if(inactivity_counter >= 200) {
         inactivity_counter = 0;
-        vga_print("CURSOR LOCATED. POINTING...", 0, 0, WHITE);
+        vga_print("FOUND CURSOR...", 0, 2, WHITE);
+        refresh_vga();
+
+        delay(4);
+
         printpicture();
       }
     } else {
-      activity_counter = 0;
+      activity_counter = 0; // reset after motion
     }
   }
 
-  // switch interrupt
+  // --- Handle switch input (cursor movement) ---
   uint32_t sw = get_sw();
   struct xy newcoords = cursorcoords;
 
@@ -320,14 +329,14 @@ void handle_interrupt(unsigned cause) {
     activity_counter = 1;
     inactivity_counter = 0;
   }
-}  
+}
 
 int main() {
   labinit();
 
-   while(1){
-      if(get_btn() == 1){
-        labinit(); //reset
-      }
-   }
+  while(1){
+    if(get_btn() == 1){
+      labinit(); //reset
+    }
+  }
 }
