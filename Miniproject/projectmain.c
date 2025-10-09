@@ -183,7 +183,7 @@ void labinit(void){
   enable_interrupt();
 }
 
-void printpicture(int *array){
+void printpicturepixel(int *array){
    for (int i = 0; i < 320; i++)
      for (int j = 0; j < 320*480; j+= 320)
         VGA[i+j] = (char) array[i+j];
@@ -201,6 +201,39 @@ void printpicture(int *array){
     }
 }
 
+void printpicture(){
+  int lowx = 0;
+   int highx = sizeof(xcoord)/sizeof(xcoord[0]);
+   int lowy = 0;
+   int highy = sizeof(ycoord)/sizeof(ycoord[0]);
+
+    while (lowx <= highx) {
+        int midx = lowx + (highx - lowx) / 2;
+        
+        if (pic.x == Matrix[midx][0].x){
+            while (lowy <= highy) {
+              int midy = lowy + (highy - lowy) / 2;
+        
+              if (pic.y == Matrix[midx][midy].y){
+                printpicturepixel(Matrix[midx][midy].arr);
+              }
+
+              else if (pic.y < Matrix[midx][midy].y)
+                lowy = midy + 1;
+
+              else
+                highy = midy - 1;
+            }
+        }
+
+        else if (pic.x < Matrix[midx][0].x)
+            lowx = midx + 1;
+
+        else
+            highx = midx - 1;
+    }
+}
+
 void corner(){
    int lowx = 0;
    int highx = sizeof(xcoord)/sizeof(xcoord[0]);
@@ -214,7 +247,7 @@ void corner(){
             pic.x = xcoord[mid];
         }
 
-        if (xcoord[mid] < cursor.x)
+        else if (xcoord[mid] < cursor.x)
             lowx = mid + 1;
 
         else
@@ -228,7 +261,7 @@ void corner(){
             pic.y = ycoord[mid];
         }
 
-        if (ycoord[mid] < cursor.y)
+        else if (ycoord[mid] < cursor.y)
             lowy = mid + 1;
 
         else
