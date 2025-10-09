@@ -30,7 +30,7 @@ struct pics Matrix[6][6]={
 };
 
 struct font font8x8[21]{
-  const unsigned char font8x8[21][8] = {
+  const unsigned char font8x8[21] = {
     {'A',{0b00011000,0b00111100,0b01100110,0b01111110,0b01100110,0b01100110,0b01100110,0b00000000}},
     {'C',{0b00111100,0b11000011,0b11000000,0b11000000,0b11000000,0b11000011,0b00111100,0b00000000}},
     {'D',{0b11111100,0b11000011,0b11000011,0b11000011,0b11000011,0b11000011,0b11111100,0b00000000}},
@@ -240,13 +240,26 @@ void draw_pixel(int x, int y, unsigned short color) {
     VGA[y * width + x] = color;
 }
 
-void draw_char(int x, int y, unsigned short color) {
-    
+void draw_char(int *ch, int x, int y, unsigned int color) {
+    for (int row = 0; row < 8; row++) {
+        int bits = ch[row];
+        for (int col = 7; col < 0; col--) {
+            if (bits & (1 << col)) {
+                VGA_draw_pixel(x + col, y + row, color);
+            }
+        }
+    }
 }
 
-void vga_print(char *str, int x, int y, int color){
-  while(*str != 0x0){
-    
+void vga_print(char *str, int x, int y, unsigned int color){
+  int k = 0;
+  while(str[k] != '\0'){
+    for(int i = 0, i < 21, i++){
+      if(str[k] = font8x8[i].c){
+        draw_char(font8x8[i].bin, x, y, color);
+      }
+    }
+    k++;
   }
 }
 
