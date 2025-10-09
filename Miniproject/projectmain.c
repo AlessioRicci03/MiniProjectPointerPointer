@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <inttypes.h>
 
 struct xy{
   int x;
@@ -17,7 +20,8 @@ struct font{
   int  binary[8];
 };
 
-struct xy cursor;
+struct xy cursorcoords;
+struct xy newcoords;
 struct xy pic;
 
 struct pics Matrix[6][6]={
@@ -75,8 +79,8 @@ volatile unsigned int * t_periodh = (volatile unsigned int*)0x0400002c;
 volatile unsigned int * t_snapl = (volatile unsigned int*)0x04000030;
 volatile unsigned int * t_snaph = (volatile unsigned int*)0x04000034;
 
-volatile char *VGA = (volatile char*) 0x08000000;
-volatile int *VGA_CTRL = (volatile int*) 0x04000100;
+volatile uint32_t *vga_ctrl = (volatile uint32_t *)0x04000100;
+volatile uint16_t  *screen_buf = (volatile uint16_t *)0x08000000;
 
 #define WHITE  0xffff
 #define BLACK  0x0000
@@ -87,9 +91,6 @@ volatile int *VGA_CTRL = (volatile int*) 0x04000100;
 
 int timecounter = 0;
 char countdown[] = "3";
-
-volatile unsigned int width = 320;
-volatile unsigned int length = 240;
 
 static const int xcoord[6]={
   0,
@@ -128,10 +129,10 @@ static void clear_screen(void) {
 
 static void draw_cursor_xy(int x, int y) {
   for (int dy = 0; dy < CRSR_SIZE; ++dy) {
-    int py = cursor.y + dy;
+    int py = y + dy;
     if (py < 0 || py >= SCREEN_H) continue;
       for (int dx = 0; dx < CRSR_SIZE; ++dx) {
-        int px = cursor.x + dx;
+        int px = x + dx;
         if (px < 0 || px >= SCREEN_W) continue;
           int off = (py * SCREEN_W + px)/2;
           screen_buf[off] = (uint16_t)WHITE;
@@ -141,10 +142,10 @@ static void draw_cursor_xy(int x, int y) {
 
 static void erase_cursor_xy(int x, int y) {
   for (int dy = 0; dy < CRSR_SIZE; ++dy) {
-    int py = cursor.y + dy;
+    int py = y + dy;
     if (py < 0 || py >= SCREEN_H) continue;
       for (int dx = 0; dx < CRSR_SIZE; ++dx) {
-        int px = cursor.x + dx;
+        int px = x + dx;
         if (px < 0 || px >= SCREEN_W) continue;
           int off = (py * SCREEN_W + px)/2;
           screen_buf[off] = (uint16_t)BLACK;
@@ -175,10 +176,10 @@ void labinit(void){
   clear_screen();
   refresh_vga();
 
-  cursor.x = SCREEN_W/2;
-  cursor.y = SCREEN_H/2
+  cursorcoords.x = SCREEN_W/2;
+  cursorcoords.y = SCREEN_H/2
 
-  draw_cursor_xy(cursor.x, cursor.y);
+  draw_cursor_xy(cursorcoords.x, cursorcoords.y);
   refresh_vga();
 }
 
@@ -347,29 +348,33 @@ int main() {
          //set the display black and write something to invite the user to stop the cursor from moving
        
          uint32_t sw = get_sw();
+
+         newcoords.x = cursorcoords.x;
+         newcoords.y = cursorcoords.y;
        
          if(sw & 0x1)
-          if (cursor.x < SCREEN_W - CRSR_SIZE) cursor.x++;
+          if (newcoords.x < SCREEN_W - CRSR_SIZE) newcoords.x++;
 
         if(sw & 0x2)
-          if (cursor.y > 0) cursor.y--;
+          if (newcoords.y > 0) newcoords.y--;
 
         if(sw & 0x4)
-          if (cursor.y < SCREEN_H - CRSR_SIZE) cursor.y++;
+          if (newcoords.y < SCREEN_H - CRSR_SIZE) newcoords.y++;
 
         if(sw & 0x8)
-          if (cursor.x > 0) cursor.x--;
+          if (newcoords.x > 0) newcoords.x--;
 
-        if (new_x != cursor_x || new_y != cursor_y) {
-          erase_cursor_xy(cursor.x, cursor.y);
-          draw_cursor_xy(cursor.x + 1, cursor.y + 1);
+        if (newcoords.x != cursorcoords.x || newcoords.y != cursorcoords.y) {
+          erase_cursor_xy(cursorcoords.x, cursorcoords.y);
+          draw_cursor_xy(newcoords.x, newcoords.y);
+          cursorcoords.x = newcoords.x;
+          cursorcoords.y = cursorcoords.y;
           refresh_vga();
         }
      
       if(get_btn() == 1){
         labinit(); //reset
     }
-      delay(1)
     }
   }
   return 0;
