@@ -138,7 +138,7 @@ enable_interrupt:
 	#csrw mie, t2
 	
 	csrsi mstatus, 3
-	csrsi mie, 16
+	csrsi mie, 17
 	
 	ret
 
