@@ -183,62 +183,29 @@ void labinit(void){
   refresh_vga();
 }
 
-void toptobottom(){
-   
-    for (int i = 0; i < 320*480; i++)
-        VGA[i] = i / 320;
-    
-    unsigned int y_ofs= 0;
-    
-    while (1){
-        
-        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
-        *(VGA_CTRL+0) = 0;
-        y_ofs= (y_ofs + 1) % 240;
-        
-        for (int i = 0; i < 1000000; i++)
-            asm volatile ("nop");
-    }
-}
-
-void bottomtotop(){
-   for (int i = 0; i < 320*480; i++)
-        VGA[i] = i / 320;
-    
-    unsigned int y_ofs= 240;
-    
-    while (1){
-        
-        *(VGA_CTRL+1) = (unsigned int) (VGA+y_ofs*320);
-        *(VGA_CTRL+0) = 0;
-        y_ofs= (y_ofs - 1) % 240;
-        
-        for (int i = 0; i < 1000000; i++)
-            asm volatile ("nop");
-    }
-}
-
-void lefttoright(){
-   for (int i = 0; i < 320*480; i++)
-        VGA[i] = i / 320;
-    
-    unsigned int x_ofs= 320;
+void printblack(){
+   for (int i = 0; i < 320; i++)
+     for (int j = 0; j < 320*480; j+= 320)
+        VGA[i+j] = 0x0000;
+    // check if the following code is needed
+    unsigned int x_ofs= 0;
     
     while (1){
         
         *(VGA_CTRL+1) = (unsigned int) (VGA+x_ofs);
         *(VGA_CTRL+0) = 0;
-        x_ofs= (x_ofs - 1) % 320;
+        x_ofs= (x_ofs+ 1) % 320;
         
         for (int i = 0; i < 1000000; i++)
             asm volatile ("nop");
     }
 }
 
-void righttoleft(){
-   for (int i = 0; i < 320*480; i++)
-        VGA[i] = i / 320;
-    
+void printpicture(char *array){
+   for (int i = 0; i < 320; i++)
+     for (int j = 0; j < 320*480; j+= 320)
+        VGA[i+j] = array[i+j];
+    // check if the following code is needed
     unsigned int x_ofs= 0;
     
     while (1){
