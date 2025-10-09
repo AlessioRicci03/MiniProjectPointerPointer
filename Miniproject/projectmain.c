@@ -308,7 +308,7 @@ void handle_interrupt(unsigned cause) {
       if(inactivity_counter >= 200) {
         inactivity_counter = 0;
         vga_print("CURSOR LOCATED. POINTING...", 0, 0, WHITE);
-        print("Hello world"); // debuging
+        printpicture();
       }
     } else {
       activity_counter = 0;
