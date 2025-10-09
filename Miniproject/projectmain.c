@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <inttypes.h>
+#include "images.h" \\must keep
 
 struct xy{
   int x;
@@ -12,7 +13,7 @@ struct xy{
 struct pics{
   int x;
   int y;
-  //picture
+  int arr[76800];
 };
 
 struct font{
@@ -25,12 +26,12 @@ struct xy newcoords;
 struct xy pic;
 
 struct pics Matrix[6][6]={
-  {{0, 0,},{0, 54,},{0, 107,},{0, 160,},{0, 213,},{0, 266,}}
-  {{40, 0,},{40, 54,},{40, 107,},{40, 160,},{40, 213,},{40, 266,}}
-  {{80, 0,},{80, 54,},{80, 107,},{80, 160,},{80, 213,},{80, 266,}}
-  {{120, 0,},{120, 54,},{120, 107,},{120, 160,},{120, 213,},{120, 266,}}
-  {{160, 0,},{160, 54,},{160, 107,},{160, 160,},{160, 213,},{160, 266,}}
-  {{200, 0,},{200, 54,},{200, 107,},{200, 160,},{200, 213,},{200, 266,}}
+  {{0, 0, img0},{0, 54, img1_5_7},{0, 107, img2_3},{0, 160, img2_3},{0, 213, img4_34},{0, 266, img1_5_7}}
+  {{40, 0, img6_8_9_11},{40, 54, img1_5_7},{40, 107, img6_8_9_11},{40, 160, img6_8_9_11},{40, 213, img10},{40, 266, img6_8_9_11}}
+  {{80, 0, img12},{80, 54, img13_14_15_26_28_30_32_33_35},{80, 107, img13_14_15_26_28_30_32_33_35},{80, 160, img13_14_15_26_28_30_32_33_35},{80, 213, img16},{80, 266, img17}}
+  {{120, 0, img18},{120, 54, img19},{120, 107, img20},{120, 160, img21},{120, 213, img22},{120, 266, img23}}
+  {{160, 0, img24},{160, 54, img25},{160, 107, img13_14_15_26_28_30_32_33_35},{160, 160, img27},{160, 213, img13_14_15_26_28_30_32_33_35},{160, 266, img29}}
+  {{200, 0, img13_14_15_26_28_30_32_33_35},{200, 54, img31},{200, 107, img13_14_15_26_28_30_32_33_35},{200, 160, img13_14_15_26_28_30_32_33_35},{200, 213, img4_34},{200, 266, img13_14_15_26_28_30_32_33_35}}
 };
 
 struct font font8x8[21]{
@@ -171,8 +172,6 @@ void labinit(void){
 
   enable_interrupt();
 
-  //create a space
-
   clear_screen();
   refresh_vga();
 
@@ -183,28 +182,10 @@ void labinit(void){
   refresh_vga();
 }
 
-void printblack(){
+void printpicture(int *array){
    for (int i = 0; i < 320; i++)
      for (int j = 0; j < 320*480; j+= 320)
-        VGA[i+j] = 0x0000;
-    // check if the following code is needed
-    unsigned int x_ofs= 0;
-    
-    while (1){
-        
-        *(VGA_CTRL+1) = (unsigned int) (VGA+x_ofs);
-        *(VGA_CTRL+0) = 0;
-        x_ofs= (x_ofs+ 1) % 320;
-        
-        for (int i = 0; i < 1000000; i++)
-            asm volatile ("nop");
-    }
-}
-
-void printpicture(char *array){
-   for (int i = 0; i < 320; i++)
-     for (int j = 0; j < 320*480; j+= 320)
-        VGA[i+j] = array[i+j];
+        VGA[i+j] = (char) array[i+j];
     // check if the following code is needed
     unsigned int x_ofs= 0;
     
