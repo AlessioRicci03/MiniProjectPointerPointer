@@ -187,18 +187,6 @@ void printpicturepixel(int *array){
    for (int i = 0; i < 320; i++)
      for (int j = 0; j < 320*480; j+= 320)
         VGA[i+j] = (char) array[i+j];
-    // check if the following code is needed
-    unsigned int x_ofs= 0;
-    
-    while (1){
-        
-        *(VGA_CTRL+1) = (unsigned int) (VGA+x_ofs);
-        *(VGA_CTRL+0) = 0;
-        x_ofs= (x_ofs+ 1) % 320;
-        
-        for (int i = 0; i < 1000000; i++)
-            asm volatile ("nop");
-    }
 }
 
 void printpicture(){
