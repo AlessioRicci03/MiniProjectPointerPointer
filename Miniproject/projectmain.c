@@ -78,6 +78,13 @@ volatile unsigned int * t_snaph = (volatile unsigned int*)0x04000034;
 volatile char *VGA = (volatile char*) 0x08000000;
 volatile int *VGA_CTRL = (volatile int*) 0x04000100;
 
+#define WHITE  0xffff
+#define BLACK  0x0000
+
+#define SCREEN_W 320
+#define SCREEN_H 240
+#define CRSR_SIZE 5
+
 int timecounter = 0;
 char countdown[] = "3";
 
@@ -102,14 +109,55 @@ static const int ycoord[6]={
   266
 };
 
-int get_sw(){
-  int tem = *toggles;
-  return tem & 0x3ff;
+static uint32_t get_sw(void) {
+  return (*toggles) & 0xf;
 }
 
 int get_btn(){
   int temp = *spbtn;
   return temp & 0x1;
+}
+
+static void clear_screen(void) {
+  const int npixels = SCREEN_W * SCREEN_H;
+  for (int i = 0; i < npixels; ++i) {
+    int off = i * 2;
+    screen_buf[off] = (uint16_t)BLACK;
+  }
+}
+
+static void draw_cursor_xy(int x, int y) {
+  for (int dy = 0; dy < CRSR_SIZE; ++dy) {
+    int py = cursor.y + dy;
+    if (py < 0 || py >= SCREEN_H) continue;
+      for (int dx = 0; dx < CRSR_SIZE; ++dx) {
+        int px = cursor.x + dx;
+        if (px < 0 || px >= SCREEN_W) continue;
+          int off = (py * SCREEN_W + px)/2;
+          screen_buf[off] = (uint16_t)WHITE;
+      }
+  }
+}
+
+static void erase_cursor_xy(int x, int y) {
+  for (int dy = 0; dy < CRSR_SIZE; ++dy) {
+    int py = cursor.y + dy;
+    if (py < 0 || py >= SCREEN_H) continue;
+      for (int dx = 0; dx < CRSR_SIZE; ++dx) {
+        int px = cursor.x + dx;
+        if (px < 0 || px >= SCREEN_W) continue;
+          int off = (py * SCREEN_W + px)/2;
+          screen_buf[off] = (uint16_t)BLACK;
+      }
+  }
+}
+
+static void refresh_vga(void) {
+
+  vga_ctrl[1] = (uint32_t)((uintptr_t)screen_buf);
+  vga_ctrl[0] = 0;
+
+  for (volatile int i = 0; i < 20000; ++i) asm volatile("nop");
 }
 
 void labinit(void){
@@ -123,10 +171,15 @@ void labinit(void){
   enable_interrupt();
 
   //create a space
-  
-  cursor.x = 120;
-  cursor.y = 160;
-  
+
+  clear_screen();
+  refresh_vga();
+
+  cursor.x = SCREEN_W/2;
+  cursor.y = SCREEN_H/2
+
+  draw_cursor_xy(cursor.x, cursor.y);
+  refresh_vga();
 }
 
 void toptobottom(){
@@ -281,39 +334,37 @@ void handle_interrupt(unsigned cause) {
 }  
 
 int main() {
-   labinit();
+  labinit();
 
    while(1){
     if(((*t_status) & 1) == 1){
        vga_print("FINDING CURSOR... PLEASE, HOLD STILL", 0, 0, 0xffff);
        (*t_status) = 0;
-       int b = getsw();
-       if(b == 0b1 XOR b == 0b10 XOR b == 0b100 XOR b == 0b1000){
+       timecounter++;
+       if(timecounter >= 1){
          timecounter = 0;
          countdown = 3;
          //set the display black and write something to invite the user to stop the cursor from moving
        
-         switch(b){
-              case 0b1:
-                 cursor.x++;
-              case 0b10:
-                 cursor.y++;
-              case 0b100:
-                 cursor.x--;
-              case 0b1000:
-                 cursor.y--;
-         }
+         uint32_t sw = get_sw();
        
-         if(cursor.x > 318)
-              cursor.x = 318;
-         else if(cursor.x < 2)
-              cursor.x = 2;
+         if(sw & 0x1)
+          if (cursor.x < SCREEN_W - CRSR_SIZE) cursor.x++;
 
-         if(cursor.y > 238)
-              cursor.y = 238;
-         else if(cursor.y < 2)
-              cursor.y = 2;
-       }
+        if(sw & 0x2)
+          if (cursor.y > 0) cursor.y--;
+
+        if(sw & 0x4)
+          if (cursor.y < SCREEN_H - CRSR_SIZE) cursor.y++;
+
+        if(sw & 0x8)
+          if (cursor.x > 0) cursor.x--;
+
+        if (new_x != cursor_x || new_y != cursor_y) {
+          erase_cursor_xy(cursor.x, cursor.y);
+          draw_cursor_xy(cursor.x + 1, cursor.y + 1);
+          refresh_vga();
+        }
      
       if(get_btn() == 1){
         labinit(); //reset
@@ -321,4 +372,5 @@ int main() {
       delay(1)
     }
   }
+  return 0;
 }
