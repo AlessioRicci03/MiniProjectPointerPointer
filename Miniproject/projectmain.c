@@ -70,7 +70,7 @@ extern int nextprime( int );
 extern void enable_interrupt(void);
 extern void handle_interrupt(unsigned cause);
 
-volatile int * toggles = (volatile int*)0x4000010;
+volatile int * toggles = (volatile int*)0x04000010;
 volatile int * spbtn = (volatile int*)0x040000d0;
 
 volatile unsigned int * t_status = (volatile unsigned int*)0x04000020;
@@ -90,7 +90,8 @@ volatile uint16_t  *screen_buf = (volatile uint16_t *)0x08000000;
 #define SCREEN_H 240
 #define CRSR_SIZE 5
 
-int timecounter = 0;
+int activity_counter = 0;
+int inactivity_counter = 0;
 char countdown[] = "3";
 
 static const int xcoord[6]={
@@ -170,8 +171,6 @@ void labinit(void){
   
   *t_ctrl = 0b0111;
 
-  enable_interrupt();
-
   clear_screen();
   refresh_vga();
 
@@ -180,6 +179,8 @@ void labinit(void){
 
   draw_cursor_xy(cursorcoords.x, cursorcoords.y);
   refresh_vga();
+  
+  enable_interrupt();
 }
 
 void printpicture(int *array){
@@ -266,19 +267,37 @@ void vga_print(char *str, int x, int y, unsigned int color){
 }
 
 void handle_interrupt(unsigned cause) {
-   if(((*t_status) & 1) == 1){
-      (*t_status) = 0;
-      timecounter++;
-      if(timecounter >= 100){
-         timecounter = 0;
-         vga_print("CURSOR LOCATED. POINTING...", 0, 0, 0xffff);
-         if(countdown[0] != "0"){
-           vga_print(countdown, 0, 10, 0xffff);
-           countdown[0]--;
-         } else{
-           //show picture
-         }
+  if((*t_status & 1) == 1) {
+    *t_status = 0;
+
+    if(!activity_counter) {
+      inactivity_counter++;
+      if(inactivity_counter >= 50) {
+        inactivity_counter = 0;
+        vga_print("CURSOR LOCATED. POINTING...", 0, 0, WHITE);
+        print("Hello world"); // debuging
       }
+    } else {
+      activity_counter = 0;
+    }
+  }
+
+  // switch interrupt
+  uint32_t sw = get_sw();
+  struct xy newcoords = cursorcoords;
+
+  if(sw & 0x1 && newcoords.x < SCREEN_W - CRSR_SIZE) newcoords.x++;
+  if(sw & 0x2 && newcoords.y > 0) newcoords.y--;
+  if(sw & 0x4 && newcoords.y < SCREEN_H - CRSR_SIZE) newcoords.y++;
+  if(sw & 0x8 && newcoords.x > 0) newcoords.x--;
+
+  if(newcoords.x != cursorcoords.x || newcoords.y != cursorcoords.y) {
+    erase_cursor_xy(cursorcoords.x, cursorcoords.y);
+    draw_cursor_xy(newcoords.x, newcoords.y);
+    cursorcoords = newcoords;
+    refresh_vga();
+    activity_counter = 1;
+    inactivity_counter = 0;
   }
 }  
 
@@ -286,44 +305,8 @@ int main() {
   labinit();
 
    while(1){
-    if(((*t_status) & 1) == 1){
-       vga_print("FINDING CURSOR... PLEASE, HOLD STILL", 0, 0, 0xffff);
-       (*t_status) = 0;
-       timecounter++;
-       if(timecounter >= 1){
-         timecounter = 0;
-         countdown = 3;
-         //set the display black and write something to invite the user to stop the cursor from moving
-       
-         uint32_t sw = get_sw();
-
-         newcoords.x = cursorcoords.x;
-         newcoords.y = cursorcoords.y;
-       
-         if(sw & 0x1)
-          if (newcoords.x < SCREEN_W - CRSR_SIZE) newcoords.x++;
-
-        if(sw & 0x2)
-          if (newcoords.y > 0) newcoords.y--;
-
-        if(sw & 0x4)
-          if (newcoords.y < SCREEN_H - CRSR_SIZE) newcoords.y++;
-
-        if(sw & 0x8)
-          if (newcoords.x > 0) newcoords.x--;
-
-        if (newcoords.x != cursorcoords.x || newcoords.y != cursorcoords.y) {
-          erase_cursor_xy(cursorcoords.x, cursorcoords.y);
-          draw_cursor_xy(newcoords.x, newcoords.y);
-          cursorcoords.x = newcoords.x;
-          cursorcoords.y = cursorcoords.y;
-          refresh_vga();
-        }
-     
       if(get_btn() == 1){
         labinit(); //reset
-    }
-    }
-  }
-  return 0;
+      }
+   }
 }
