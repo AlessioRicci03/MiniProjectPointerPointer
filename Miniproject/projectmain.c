@@ -13,7 +13,7 @@ struct xy{
 struct pics{
   int x;
   int y;
-  int arr[76800];
+  int *arr;
 };
 
 struct font{
@@ -59,13 +59,7 @@ struct font font8x8[22] = {
   {',',{0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b11000000,0b11000000,0b11000000}}
 };
 
-extern void print(const char*);
-extern void print_dec(unsigned int);
-extern void display_string(char*);
-extern void time2string(char*,int);
-extern void tick(int*);
 extern void delay(int);
-extern int nextprime( int );
 
 extern void enable_interrupt(void);
 extern void handle_interrupt(unsigned cause);
@@ -185,95 +179,37 @@ void labinit(void){
   enable_interrupt();
 }
 
-void printpicturepixel(int *array) {
+void printpicturepixel(const int *array) {
   for (int y = 0; y < SCREEN_H; y++) {
     for (int x = 0; x < SCREEN_W; x++) {
-      int idx = y * SCREEN_W + x;
-      screen_buf[idx] = (char) array[idx];
+      int idx = (y * SCREEN_W + x);
+      screen_buf[idx/2] = (uint16_t)(array[idx] & WHITE);
     }
   }
-  refresh_vga();
 }
 
-void printpicture(){
-  int lowx = 0;
-  int highx = sizeof(xcoord)/sizeof(xcoord[0]);
-  int lowy = 0;
-  int highy = sizeof(ycoord)/sizeof(ycoord[0]);
+int* corner_get_image(void) {
+  for (int i = 0; i < 6; i++) {
+    if (cursorcoords.y >= ycoord[i] && (i == 5 || cursorcoords.y < ycoord[i + 1])) {
+      for (int j = 0; j < 6; j++) {
+        if (cursorcoords.x >= xcoord[j] && (j == 5 || cursorcoords.x < xcoord[j + 1])) {
 
-  while (lowx <= highx) {
-    int midx = lowx + (highx - lowx) / 2;
-        
-    if (pic.x == Matrix[midx][0].x){
-      while (lowy <= highy) {
-        int midy = lowy + (highy - lowy) / 2;
-        
-        if (pic.y == Matrix[midx][midy].y){
-          printpicturepixel(Matrix[midx][midy].arr);
-          return;
+          pic.x = xcoord[j];
+          pic.y = ycoord[i];
+
+          return Matrix[5 - i][j].arr;
         }
-
-        else if (pic.y < Matrix[midx][midy].y)
-          highy = midy - 1;
-
-        else
-          lowy = midy + 1;
       }
     }
-
-    else if (pic.x < Matrix[midx][0].x)
-      highx = midx - 1;
-
-    else
-      lowx = midx + 1;
   }
-}
-
-void corner(){
-   int lowx = 0;
-   int highx = sizeof(xcoord)/sizeof(xcoord[0]);
-   int lowy = 0;
-   int highy = sizeof(ycoord)/sizeof(ycoord[0]);
-
-  if (cursorcoords.x < xcoord[0]) cursorcoords.x = xcoord[0];
-  else if (cursorcoords.x > xcoord[highx]) cursorcoords.x = xcoord[highx];
-  else if (cursorcoords.y < ycoord[0]) cursorcoords.y = ycoord[0];
-  else if (cursorcoords.y > ycoord[highy]) cursorcoords.y = ycoord[highy];
-  
-   while (lowx <= highx) {
-        int mid = lowx + (highx - lowx) / 2;
-        
-        if (xcoord[mid] <= cursorcoords.x && xcoord[mid+1] > cursorcoords.x){
-            pic.x = xcoord[mid];
-        }
-
-        if (xcoord[mid] < cursorcoords.x)
-            lowx = mid + 1;
-
-        else
-            highx = mid - 1;
-    }
-
-   while (lowy <= highy) {
-        int mid = lowy + (highy - lowy) / 2;
-        
-        if (ycoord[mid] <= cursorcoords.y && ycoord[mid+1] > cursorcoords.y){
-            pic.y = ycoord[mid];
-        }
-
-        if (ycoord[mid] < cursorcoords.y)
-            lowy = mid + 1;
-
-        else
-            highy = mid - 1;
-    }
-
+  return NULL;
 }
 
 void draw_pixel(int x, int y, unsigned short color) {
     if (x < 0 || x >= SCREEN_W || y < 0 || y >= SCREEN_H) 
       return;
-    screen_buf[y * SCREEN_W + x] = color;
+    int offs = (y * SCREEN_W + x)/2;
+    screen_buf[offs] = color;
 }
 
 void draw_char(int *ch, int x, int y, unsigned int color) {
@@ -304,25 +240,30 @@ void vga_print(char *str, int x, int y, unsigned int color){
 
 void handle_interrupt(unsigned cause) {
   if((*t_status & 1) == 1) {
-    *t_status = 0; // clear timer flag
+    *t_status = 0;
 
     if(!activity_counter) {
       inactivity_counter++;
       if(inactivity_counter >= 200) {
         inactivity_counter = 0;
+
         vga_print("FOUND CURSOR...", 0, 2, WHITE);
         refresh_vga();
-
         delay(4);
 
-        printpicture();
+        int *img = corner_get_image();
+        if(img != NULL){
+          clear_screen();
+          printpicturepixel(img);
+          draw_cursor_xy(cursorcoords.x, cursorcoords.y);
+          refresh_vga();
+        }
       }
     } else {
-      activity_counter = 0; // reset after motion
+      activity_counter = 0;
     }
   }
 
-  // --- Handle switch input (cursor movement) ---
   uint32_t sw = get_sw();
   struct xy newcoords = cursorcoords;
 
