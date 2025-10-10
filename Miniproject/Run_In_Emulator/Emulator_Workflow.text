@@ -8,4 +8,24 @@ For this project we used a Linux based toolchain for the DE10-Lite dtekv board. 
 
 make clean && make
 
-In Ubuntu (which is our Linux terminal of choice) to get the main.bin file that the Emulator expects to read.
+In Ubuntu (which is our Linux terminal of choice) to get the main.bin file that the Emulator expects to read. If it is the first time 
+you compile the program, disregard 'make clean' unless you really want to write it. 'make clean' is meant to decompile the program.
+For first-time compiling, use:
+
+make
+
+It really doesn't matter, but for the sake of "right" procedure I will include this detail.
+
+To play our little find-the-cursor game you use the first four switches that the Emulator provides. Switch 0-3 
+with switch 0 being the one furthest to the left and then we count going to the right.
+
+The first switch, switch 0, will move the cursor to the right.
+The second switch, switch 1, will move the cursor up.
+The third switch, switch 2, will move the cursor down.
+The fourth switch, switch 3, will move the cursor to the left.
+
+When satisfied with moving the cursor one must wait for the program to find the cursor, simply hold still for a moment and wait for 
+the program to say "FOUND CURSOR..." in the top left of the display. Afterwards an image will appear on screen with a person, persons, 
+or a disembodied hand to show you where you are.
+
+Press the big button on the left side of the switches to restart the mindless entertainment!
