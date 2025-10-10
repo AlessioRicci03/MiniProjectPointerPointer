@@ -1,1 +1,5 @@
-This document will describe the workflow and set up required to run this project on the dtekv board:
+There is not much to tell for this part of the project as we quickly realized going further with using the board 
+would require extra hardware that we did not feel we had the time for. The idea is simple however. Using usbipd 
+we can connect a USB mouse to WSL2 and access it's position via "/dev/input/mice". The rest would be very 
+similar as to how the program is executed in the Emulator. Below you will see the start of using the mouse as an
+I/O device in WSL2.
