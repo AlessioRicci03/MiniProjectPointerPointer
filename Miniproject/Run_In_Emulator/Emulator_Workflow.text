@@ -1,1 +1,10 @@
 This document will describe the workflow and set up required to run this project in the dtekv emulator:
+
+The most important thing when running any program is to make sure that you have all the files downloaded inside the right directory.
+Make sure that you have all files within this folder downloaded before moving on.
+
+For this project we used a Linux based toolchain for the DE10-Lite dtekv board. Thus our second and last step is to run the command:
+
+make clean && make
+
+In Ubuntu (which is our Linux terminal of choice) to get the main.bin file that the Emulator expects to read.
