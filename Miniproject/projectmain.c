@@ -13,7 +13,7 @@ struct xy{
 struct pics{
   int x;
   int y;
-  int arr[76800];
+  iuint16_t arr[76800];
 };
 
 struct font{
@@ -185,10 +185,14 @@ void labinit(void){
   enable_interrupt();
 }
 
-void printpicturepixel(int *array){
-  for (int i = 0; i < 320; i++)
-    for (int j = 0; j < 320*480; j+= 320)
-      screen_buf[i+j] = (char) array[i+j];
+void printpicturepixel(uint16_t *array) {
+  for (int y = 0; y < SCREEN_H; y++) {
+    for (int x = 0; x < SCREEN_W; x++) {
+      int idx = y * SCREEN_W + x;
+      screen_buf[idx] = (char)array[idx]; // Direct copy, assuming array is uint16_t
+    }
+  }
+  refresh_vga();
 }
 
 void printpicture(){
@@ -206,21 +210,22 @@ void printpicture(){
         
         if (pic.y == Matrix[midx][midy].y){
           printpicturepixel(Matrix[midx][midy].arr);
+          return;
         }
 
         else if (pic.y < Matrix[midx][midy].y)
-          lowy = midy + 1;
+          highy = midy - 1;
 
         else
-          highy = midy - 1;
+          lowy = midy + 1;
       }
     }
 
     else if (pic.x < Matrix[midx][0].x)
-      lowx = midx + 1;
+      highx = midx - 1;
 
     else
-      highx = midx - 1;
+      lowx = midx + 1;
   }
 }
 
@@ -230,6 +235,11 @@ void corner(){
    int lowy = 0;
    int highy = sizeof(ycoord)/sizeof(ycoord[0]);
 
+  if (cursorcoords.x < xcoord[0]) cursorcoords.x = xcoord[0];
+  else if (cursorcoords.x > xcoord[highx]) cursorcoords.x = xcoord[highx];
+  else if (cursorcoords.y < ycoord[0]) cursorcoords.y = ycoord[0];
+  else if (cursorcoords.y > ycoord[highy]) cursorcoords.y = ycoord[highy];
+  
    while (lowx <= highx) {
         int mid = lowx + (highx - lowx) / 2;
         
