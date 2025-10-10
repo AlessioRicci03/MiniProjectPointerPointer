@@ -13,7 +13,7 @@ struct xy{
 struct pics{
   int x;
   int y;
-  iuint16_t arr[76800];
+  int arr[76800];
 };
 
 struct font{
@@ -185,11 +185,11 @@ void labinit(void){
   enable_interrupt();
 }
 
-void printpicturepixel(uint16_t *array) {
+void printpicturepixel(int *array) {
   for (int y = 0; y < SCREEN_H; y++) {
     for (int x = 0; x < SCREEN_W; x++) {
       int idx = y * SCREEN_W + x;
-      screen_buf[idx] = (char)array[idx]; // Direct copy, assuming array is uint16_t
+      screen_buf[idx] = (char) array[idx];
     }
   }
   refresh_vga();
